@@ -1,0 +1,30 @@
+{
+  "name": "react-firebase",
+  "description": "Colaboration app using Fabebook's React and Firebase",
+  "main": "server.js",
+  "authors": [
+    "Davi Alves"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "firebase"
+  ],
+  "moduleType": [
+    "es6",
+    "globals",
+    "node"
+  ],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "skeleton": "~2.0.4"
+  }
+}
