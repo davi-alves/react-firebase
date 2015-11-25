@@ -71,3 +71,5 @@ router.post('/api/signout', function (req, res) {
 
   return res.json({signedIn: false, message: 'You have signed out'});
 });
+
+module.exports = router;

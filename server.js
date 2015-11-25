@@ -6,7 +6,7 @@ express()
   .use(require('./accounts'))
   .get('*', function(req, res) {
     res.render('index', {
-      user: JSON.stringify(req.session.user)
+      user: JSON.stringify(req.session.user || {})
     });
   })
   .listen(3000);
