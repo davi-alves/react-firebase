@@ -4,7 +4,7 @@
   "description": "Colaboration app using Fabebook's React and Firebase",
   "main": "server.js",
   "scripts": {
-    "start": "watch ",
+    "start": "node server.js",
     "build:js": "browserify ./src/app.js -t [babelify --optional  es7.classProperties] --outfile public/all.js",
     "build": "watch \"npm run build:js\" ./src",
     "test": "echo \"Error: no test specified\" && exit 1"

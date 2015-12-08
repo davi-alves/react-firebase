@@ -23213,15 +23213,23 @@ var _componentsApp = require('./components/App');
 
 var _componentsApp2 = _interopRequireDefault(_componentsApp);
 
+var _componentsPage = require('./components/Page');
+
+var _componentsPage2 = _interopRequireDefault(_componentsPage);
+
 var Route = _reactRouter2['default'].Route;
 
-var routes = _react2['default'].createElement(Route, { handler: _componentsApp2['default'] });
+var routes = _react2['default'].createElement(
+  Route,
+  { handler: _componentsApp2['default'] },
+  _react2['default'].createElement(Route, { name: 'page', path: '/page/:id', handler: _componentsPage2['default'] })
+);
 
 _reactRouter2['default'].run(routes, _reactRouter2['default'].HistoryLocation, function (Root) {
   return _react2['default'].render(_react2['default'].createElement(Root, null), document.getElementById('app'));
 });
 
-},{"./components/App":202,"react":199,"react-router":27}],202:[function(require,module,exports){
+},{"./components/App":202,"./components/Page":204,"react":199,"react-router":27}],202:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23247,6 +23255,10 @@ var _reactRouter = require('react-router');
 var _Login = require('./Login');
 
 var _Login2 = _interopRequireDefault(_Login);
+
+var _PageList = require('./PageList');
+
+var _PageList2 = _interopRequireDefault(_PageList);
 
 var App = (function (_React$Component) {
   _inherits(App, _React$Component);
@@ -23283,7 +23295,7 @@ var App = (function (_React$Component) {
               'Wicker'
             ),
             _react2['default'].createElement(_Login2['default'], { user: this.state.user, setUser: this.setUser }),
-            'PageList'
+            _react2['default'].createElement(_PageList2['default'], { user: this.state.user })
           ),
           _react2['default'].createElement(
             'div',
@@ -23303,7 +23315,7 @@ exports['default'] = App;
 module.exports = exports['default'];
 // USER comes from index template
 
-},{"./Login":203,"react":199,"react-router":27}],203:[function(require,module,exports){
+},{"./Login":203,"./PageList":205,"react":199,"react-router":27}],203:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23434,4 +23446,244 @@ exports['default'] = Login;
 ;
 module.exports = exports['default'];
 
-},{"../api":200,"react":199}]},{},[201]);
+},{"../api":200,"react":199}],204:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _api = require('../api');
+
+var API = _interopRequireWildcard(_api);
+
+var Page = (function (_React$Component) {
+  _inherits(Page, _React$Component);
+
+  function Page() {
+    var _this = this;
+
+    _classCallCheck(this, Page);
+
+    _get(Object.getPrototypeOf(Page.prototype), 'constructor', this).apply(this, arguments);
+
+    this.state = { page: {} };
+
+    this.updateContent = function (snapshot) {
+      var page = snapshot.exportVal();
+      _this.setState({
+        page: page,
+        sections: page.sections
+      });
+    };
+
+    this.addSection = function () {
+      var id = undefined;
+
+      if (!_this.state.sections) {
+        id = 1;
+        _this.state.sections = {};
+      } else {
+        id = Math.max.apply(Math, _toConsumableArray(Object.keys(_this.state.sections))) + 1; // get the highest id and increase by 1
+      }
+
+      _this.state.sections[id] = {
+        editor: _this.props.user.username
+      };
+
+      _this.setState({ sections: _this.state.sections });
+    };
+  }
+
+  _createClass(Page, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      API.pages.child(this.props.params.id).off('value', this.updateContent);
+      API.pages.child(nextProps.params.id).on('value', this.updateContent);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var sections = [];
+
+      if (this.state.page.title) {
+        // data is loaded
+        // render sections
+
+        if (this.props.user) {
+          sections.push(_react2['default'].createElement(
+            'p',
+            { key: 'addAction' },
+            _react2['default'].createElement(
+              'button',
+              { onClick: this.addSection },
+              'Add Section'
+            )
+          ));
+        }
+      }
+
+      return _react2['default'].createElement(
+        'article',
+        null,
+        _react2['default'].createElement(
+          'h1',
+          null,
+          this.state.page.title || 'Loading...'
+        ),
+        sections
+      );
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      API.pages.child(this.props.params.id).on('value', this.updateContent);
+    }
+  }]);
+
+  return Page;
+})(_react2['default'].Component);
+
+exports['default'] = Page;
+;
+module.exports = exports['default'];
+
+},{"../api":200,"react":199}],205:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouter = require('react-router');
+
+var _api = require('../api');
+
+var API = _interopRequireWildcard(_api);
+
+var PageList = (function (_React$Component) {
+  _inherits(PageList, _React$Component);
+
+  function PageList() {
+    var _this = this;
+
+    _classCallCheck(this, PageList);
+
+    _get(Object.getPrototypeOf(PageList.prototype), 'constructor', this).apply(this, arguments);
+
+    this.state = {
+      loaded: false,
+      pages: {},
+      newPageTitle: ''
+    };
+
+    this.update = function (ev) {
+      return _this.setState({ newPageTitle: ev.target.value });
+    };
+
+    this.createPage = function (ev) {
+      if (ev.charCode !== 13) {
+        return;
+      }
+
+      // the push will automatically save the object as a new entity to the Firebase database
+      API.pages.push({ title: _this.state.newPageTitle });
+      _this.setState({ newPageTitle: '' });
+    };
+  }
+
+  _createClass(PageList, [{
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var items = this.state.loaded ? Object.keys(this.state.pages).map(function (id) {
+        return _react2['default'].createElement(
+          'li',
+          { key: id },
+          _react2['default'].createElement(
+            _reactRouter.Link,
+            { to: 'page', params: { id: id } },
+            _this2.state.pages[id].title
+          )
+        );
+      }) : [_react2['default'].createElement(
+        'li',
+        { key: 'loading' },
+        _react2['default'].createElement(
+          'em',
+          null,
+          'Loading'
+        )
+      )];
+
+      return _react2['default'].createElement(
+        'div',
+        null,
+        this.props.user ? _react2['default'].createElement('input', { className: 'u-full-width', placeholder: 'New Page Title', type: 'text',
+          value: this.state.newPageTitle,
+          onChange: this.update,
+          onKeyPress: this.createPage }) : null,
+        _react2['default'].createElement(
+          'ul',
+          null,
+          items
+        )
+      );
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this3 = this;
+
+      API.pages.on('value', function (snapshot) {
+        return _this3.setState({
+          pages: snapshot.exportVal() || [],
+          loaded: true
+        });
+      });
+    }
+  }]);
+
+  return PageList;
+})(_react2['default'].Component);
+
+exports['default'] = PageList;
+;
+module.exports = exports['default'];
+
+},{"../api":200,"react":199,"react-router":27}]},{},[201]);
