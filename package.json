@@ -6,7 +6,7 @@
   "scripts": {
     "start": "watch ",
     "build:js": "browserify ./src/app.js -t [babelify --optional  es7.classProperties] --outfile public/all.js",
-    "build": "watch 'npm run build:js' ./src",
+    "build": "watch \"npm run build:js\" ./src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Davi Alves",

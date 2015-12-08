@@ -5,11 +5,16 @@
     <title>React + Firebase</title>
     <link rel="stylesheet" href="/lib/skeleton/css/skeleton.css">
     <link rel="stylesheet" href="/style.css">
+
+    <!-- POLYFILLS -->
+    <script src="/lib/es6-promise/promise.js"></script>
+    <script src="/lib/fetch/fetch.js"></script>
+    <!-- /POLYFILLS -->
   </head>
   <body>
     <div class="container" id="app"></div>
 
-    <script>var USER = <%= user %>;</script>
+    <script>var USER = <%- user %>;</script>
     <script src="/all.js"></script>
   </body>
 </html>

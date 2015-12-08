@@ -25,6 +25,8 @@
     "tests"
   ],
   "dependencies": {
-    "skeleton": "~2.0.4"
+    "skeleton": "~2.0.4",
+    "fetch": "~0.10.1",
+    "es6-promise": "~3.0.2"
   }
 }
