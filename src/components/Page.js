@@ -43,7 +43,8 @@ export default class Page extends React.Component {
     if (this.state.page.title) { // data is loaded
       if (this.state.sections) {
         sections = Object.keys(this.state.sections)
-          .map((id) => <Section key={id} section={this.state.sections[id]} />);
+          .map((id) => <Section key={id} user={this.props.user}
+            section={this.state.sections[id]} path={`${this.props.params.id}/sections/${id}` } />);
       };
 
       if (this.props.user) {

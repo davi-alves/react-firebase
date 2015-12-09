@@ -25888,7 +25888,8 @@ var Page = (function (_React$Component) {
         // data is loaded
         if (this.state.sections) {
           sections = Object.keys(this.state.sections).map(function (id) {
-            return _react2['default'].createElement(_Section2['default'], { key: id, section: _this2.state.sections[id] });
+            return _react2['default'].createElement(_Section2['default'], { key: id, user: _this2.props.user,
+              section: _this2.state.sections[id], path: _this2.props.params.id + '/sections/' + id });
           });
         };
 
@@ -26083,30 +26084,71 @@ var Section = (function (_React$Component) {
   _inherits(Section, _React$Component);
 
   function Section(props) {
+    var _this = this;
+
     _classCallCheck(this, Section);
 
     _get(Object.getPrototypeOf(Section.prototype), 'constructor', this).call(this, props);
 
     this.getState = function (props) {
       return {
+        editing: props.user && props.user.username === props.section.editor,
         content: props.section.content,
         html: props.section.content ? _markdown.markdown.toHTML(props.section.content) : ''
       };
+    };
+
+    this.startEditing = function (ev) {
+      if (!_this.props.user || _this.state.editing) {
+        return;
+      }
+
+      _this.setState({ editing: true });
+      API.pages.child(_this.props.path).update({ editor: _this.props.user.username });
+    };
+
+    this.updateContent = function (ev) {
+      return _this.setState({ content: ev.target.value });
+    };
+
+    this.save = function (ev) {
+      _this.setState({ editing: false });
+
+      API.pages.child(_this.props.path).update({
+        editor: null,
+        content: _this.state.content || null
+      });
     };
 
     this.state = this.getState(props);
   }
 
   _createClass(Section, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      this.setState(this.getState(nextProps));
+    }
+  }, {
     key: 'render',
     value: function render() {
-      var content = _react2['default'].createElement('span', { dangerouslySetInnerHTML: { __html: this.state.html } });
-
+      var content = undefined;
       var classes = ['row', 'section'];
+
+      if (this.props.user) {
+        classes.push('editable');
+      }
+
+      if (this.state.editing) {
+        classes.push('editing');
+        content = _react2['default'].createElement('textarea', { className: 'twelve columns', defaultValue: this.state.content,
+          onChange: this.updateContent, onBlur: this.save });
+      } else {
+        content = _react2['default'].createElement('span', { dangerouslySetInnerHTML: { __html: this.state.html } });
+      }
 
       return _react2['default'].createElement(
         'section',
-        { className: classes.join(' ') },
+        { onClick: this.startEditing, className: classes.join(' ') },
         content
       );
     }

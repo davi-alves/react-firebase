@@ -12,17 +12,53 @@ export default class Section extends React.Component {
   }
 
   getState = (props) => ({
+    editing: props.user && props.user.username === props.section.editor,
     content: props.section.content,
     html: props.section.content ? markdown.toHTML(props.section.content) : ''
   })
 
-  render() {
-    let content = <span dangerouslySetInnerHTML={{__html: this.state.html}}/>;
+  startEditing = (ev) => {
+    if (!this.props.user || this.state.editing) {
+      return;
+    }
 
-    let classes = ['row', 'section']
+    this.setState({editing: true});
+    API.pages.child(this.props.path).update({editor: this.props.user.username});
+  }
+
+  updateContent = (ev) => this.setState({content: ev.target.value});
+
+  save = (ev) => {
+    this.setState({editing: false});
+
+    API.pages.child(this.props.path).update({
+      editor: null,
+      content: this.state.content || null
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(this.getState(nextProps));
+  }
+
+  render() {
+    let content;
+    let classes = ['row', 'section'];
+
+    if (this.props.user) {
+      classes.push('editable');
+    }
+
+    if (this.state.editing) {
+      classes.push('editing');
+      content = <textarea className="twelve columns" defaultValue={this.state.content}
+        onChange={this.updateContent} onBlur={this.save}></textarea>
+    } else {
+      content = <span dangerouslySetInnerHTML={{__html: this.state.html}}/>;
+    }
 
     return (
-      <section className={classes.join(' ')}>{content}</section>
+      <section onClick={this.startEditing}className={classes.join(' ')}>{content}</section>
     );
   }
 };
