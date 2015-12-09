@@ -12,6 +12,7 @@ export default class Section extends React.Component {
   }
 
   getState = (props) => ({
+    locked: props.user && props.section.editor && props.user.username !== props.section.editor,
     editing: props.user && props.user.username === props.section.editor,
     content: props.section.content,
     html: props.section.content ? markdown.toHTML(props.section.content) : ''
@@ -46,7 +47,7 @@ export default class Section extends React.Component {
     let classes = ['row', 'section'];
 
     if (this.props.user) {
-      classes.push('editable');
+      classes.push(this.state.locked ? 'locked' : 'editable');
     }
 
     if (this.state.editing) {
