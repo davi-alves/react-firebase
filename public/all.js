@@ -26083,12 +26083,12 @@ var API = _interopRequireWildcard(_api);
 var Section = (function (_React$Component) {
   _inherits(Section, _React$Component);
 
-  function Section(props) {
+  function Section(props, context) {
     var _this = this;
 
     _classCallCheck(this, Section);
 
-    _get(Object.getPrototypeOf(Section.prototype), 'constructor', this).call(this, props);
+    _get(Object.getPrototypeOf(Section.prototype), 'constructor', this).call(this, props, context);
 
     this.getState = function (props) {
       return {
@@ -26099,13 +26099,24 @@ var Section = (function (_React$Component) {
       };
     };
 
-    this.startEditing = function (ev) {
-      if (!_this.props.user || _this.state.editing) {
+    this.startEditing = function (evt) {
+      if (evt.target.tagName === 'A') {
+        var href = evt.target.getAttribute('href');
+        if (href.indexOf('/page/') === 0) {
+          _this.context.router.transitionTo(href);
+          return evt.preventDefault();
+        }
+        return;
+      }
+
+      if (!_this.props.user || _this.state.editing || _this.state.locked) {
         return;
       }
 
       _this.setState({ editing: true });
-      API.pages.child(_this.props.path).update({ editor: _this.props.user.username });
+      API.pages.child(_this.props.path).update({
+        editor: _this.props.user.username
+      });
     };
 
     this.updateContent = function (ev) {
@@ -26121,13 +26132,59 @@ var Section = (function (_React$Component) {
       });
     };
 
+    this.context = context;
     this.state = this.getState(props);
   }
 
   _createClass(Section, [{
+    key: 'makeLinks',
+    value: function makeLinks(html, callback) {
+      var anchor = /\[\[(.*)\]\]/g;
+
+      API.pages.once('value', function (snapshot) {
+        var pages = snapshot.exportVal();
+        var keys = Object.keys(pages);
+
+        callback(html.replace(anchor, function (match, anchorText) {
+          var _iteratorNormalCompletion = true;
+          var _didIteratorError = false;
+          var _iteratorError = undefined;
+
+          try {
+            for (var _iterator = keys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+              var key = _step.value;
+
+              if (pages[key].title === anchorText.trim()) {
+                return '<a href="/page/' + key + '">' + anchorText + '</a>';
+              }
+            }
+          } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion && _iterator['return']) {
+                _iterator['return']();
+              }
+            } finally {
+              if (_didIteratorError) {
+                throw _iteratorError;
+              }
+            }
+          }
+        }));
+      });
+    }
+  }, {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(nextProps) {
-      this.setState(this.getState(nextProps));
+      var _this2 = this;
+
+      var state = this.getState(nextProps);
+      this.makeLinks(state.html, function (html) {
+        state.html = html;
+        _this2.setState(state);
+      });
     }
   }, {
     key: 'render',
@@ -26153,6 +26210,11 @@ var Section = (function (_React$Component) {
         content
       );
     }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.componentWillReceiveProps(this.props);
+    }
   }]);
 
   return Section;
@@ -26160,6 +26222,10 @@ var Section = (function (_React$Component) {
 
 exports['default'] = Section;
 ;
+
+Section.contextTypes = {
+  router: _react2['default'].PropTypes.func.isRequired
+};
 module.exports = exports['default'];
 
 },{"../api":205,"markdown":6,"react":204}]},{},[206]);

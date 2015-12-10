@@ -5,9 +5,9 @@ import * as API from '../api';
 
 export default class Section extends React.Component {
 
-  constructor(props) {
-    super(props);
-
+  constructor (props, context) {
+    super(props, context);
+    this.context = context;
     this.state = this.getState(props);
   }
 
@@ -18,13 +18,24 @@ export default class Section extends React.Component {
     html: props.section.content ? markdown.toHTML(props.section.content) : ''
   })
 
-  startEditing = (ev) => {
-    if (!this.props.user || this.state.editing) {
+  startEditing = (evt) => {
+    if (evt.target.tagName === 'A') {
+      var href = evt.target.getAttribute('href');
+      if (href.indexOf('/page/') === 0) {
+        this.context.router.transitionTo(href);
+        return evt.preventDefault();
+      }
       return;
     }
 
-    this.setState({editing: true});
-    API.pages.child(this.props.path).update({editor: this.props.user.username});
+    if (!this.props.user || this.state.editing || this.state.locked) {
+      return;
+    }
+
+    this.setState({ editing: true });
+    API.pages.child(this.props.path).update({
+      editor: this.props.user.username
+    });
   }
 
   updateContent = (ev) => this.setState({content: ev.target.value});
@@ -38,8 +49,29 @@ export default class Section extends React.Component {
     });
   }
 
+  makeLinks(html, callback) {
+    const anchor = /\[\[(.*)\]\]/g;
+
+    API.pages.once('value', (snapshot) => {
+      let pages = snapshot.exportVal();
+      let keys = Object.keys(pages);
+
+      callback(html.replace(anchor, (match, anchorText) => {
+        for (let key of keys) {
+          if (pages[key].title === anchorText.trim()) {
+            return `<a href="/page/${key}">${anchorText}</a>`;
+          }
+        }
+      }));
+    })
+  }
+
   componentWillReceiveProps(nextProps) {
-    this.setState(this.getState(nextProps));
+    let state = this.getState(nextProps);
+    this.makeLinks(state.html, (html) => {
+      state.html = html;
+      this.setState(state);
+    });
   }
 
   render() {
@@ -62,4 +94,12 @@ export default class Section extends React.Component {
       <section onClick={this.startEditing}className={classes.join(' ')}>{content}</section>
     );
   }
+
+  componentDidMount() {
+    this.componentWillReceiveProps(this.props);
+  }
+};
+
+Section.contextTypes = {
+  router: React.PropTypes.func.isRequired
 };

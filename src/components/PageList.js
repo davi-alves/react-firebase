@@ -26,8 +26,8 @@ export default class PageList extends React.Component {
   render() {
     let items = this.state.loaded ?
       Object.keys(this.state.pages)
-        .map((id) => <li key={id}><Link to='page' params={ {id: id} }>{this.state.pages[id].title}</Link></li>) :
-        [<li key="loading"><em>Loading</em></li>];
+        .map((id) => <li key={id}><Link to="page" params={ {id: id} }>{this.state.pages[id].title}</Link></li>) :
+      [<li key="loading"><em>Loading</em></li>];
 
     return (
       <div>
