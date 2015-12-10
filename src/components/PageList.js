@@ -11,6 +11,12 @@ export default class PageList extends React.Component {
     newPageTitle: ''
   }
 
+  constructor(props, context) {
+    super(props, context);
+
+    this.context = context;
+  }
+
   update = (ev) => this.setState({newPageTitle: ev.target.value});
 
   createPage = (ev) => {
@@ -19,7 +25,8 @@ export default class PageList extends React.Component {
     }
 
     // the push will automatically save the object as a new entity to the Firebase database
-    API.pages.push({title: this.state.newPageTitle});
+    var id = API.pages.push({title: this.state.newPageTitle});
+    this.context.router.transitionTo('page', {id: id.key()});
     this.setState({newPageTitle: ''});
   }
 
@@ -47,4 +54,8 @@ export default class PageList extends React.Component {
       loaded: true
     }))
   }
+};
+
+PageList.contextTypes = {
+  router: React.PropTypes.func.isRequired
 };

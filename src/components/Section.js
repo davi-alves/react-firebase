@@ -84,8 +84,9 @@ export default class Section extends React.Component {
 
     if (this.state.editing) {
       classes.push('editing');
-      content = <textarea className="twelve columns" defaultValue={this.state.content}
-        onChange={this.updateContent} onBlur={this.save}></textarea>
+      content = <textarea className="twelve columns" ref="editor"
+        defaultValue={this.state.content} onChange={this.updateContent}
+        onBlur={this.save}></textarea>
     } else {
       content = <span dangerouslySetInnerHTML={{__html: this.state.html}}/>;
     }
@@ -93,6 +94,12 @@ export default class Section extends React.Component {
     return (
       <section onClick={this.startEditing}className={classes.join(' ')}>{content}</section>
     );
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.editing) {
+      React.findDOMNode(this.refs.editor).focus();
+    }
   }
 
   componentDidMount() {

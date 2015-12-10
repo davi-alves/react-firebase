@@ -25963,12 +25963,12 @@ var API = _interopRequireWildcard(_api);
 var PageList = (function (_React$Component) {
   _inherits(PageList, _React$Component);
 
-  function PageList() {
+  function PageList(props, context) {
     var _this = this;
 
     _classCallCheck(this, PageList);
 
-    _get(Object.getPrototypeOf(PageList.prototype), 'constructor', this).apply(this, arguments);
+    _get(Object.getPrototypeOf(PageList.prototype), 'constructor', this).call(this, props, context);
 
     this.state = {
       loaded: false,
@@ -25986,9 +25986,12 @@ var PageList = (function (_React$Component) {
       }
 
       // the push will automatically save the object as a new entity to the Firebase database
-      API.pages.push({ title: _this.state.newPageTitle });
+      var id = API.pages.push({ title: _this.state.newPageTitle });
+      _this.context.router.transitionTo('page', { id: id.key() });
       _this.setState({ newPageTitle: '' });
     };
+
+    this.context = context;
   }
 
   _createClass(PageList, [{
@@ -26049,6 +26052,10 @@ var PageList = (function (_React$Component) {
 
 exports['default'] = PageList;
 ;
+
+PageList.contextTypes = {
+  router: _react2['default'].PropTypes.func.isRequired
+};
 module.exports = exports['default'];
 
 },{"../api":205,"react":204,"react-router":32}],211:[function(require,module,exports){
@@ -26198,8 +26205,9 @@ var Section = (function (_React$Component) {
 
       if (this.state.editing) {
         classes.push('editing');
-        content = _react2['default'].createElement('textarea', { className: 'twelve columns', defaultValue: this.state.content,
-          onChange: this.updateContent, onBlur: this.save });
+        content = _react2['default'].createElement('textarea', { className: 'twelve columns', ref: 'editor',
+          defaultValue: this.state.content, onChange: this.updateContent,
+          onBlur: this.save });
       } else {
         content = _react2['default'].createElement('span', { dangerouslySetInnerHTML: { __html: this.state.html } });
       }
@@ -26209,6 +26217,13 @@ var Section = (function (_React$Component) {
         { onClick: this.startEditing, className: classes.join(' ') },
         content
       );
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate(prevProps, prevState) {
+      if (this.state.editing) {
+        _react2['default'].findDOMNode(this.refs.editor).focus();
+      }
     }
   }, {
     key: 'componentDidMount',
